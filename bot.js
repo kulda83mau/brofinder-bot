@@ -31,14 +31,19 @@ client.on('messageCreate', async (msg) => {
 
     try {
         const res = await fetch(VERIFY_URL + '?code=' + encodeURIComponent(code));
-        const data = await res.json();
+        const body = await res.text();
+        console.log('VERIFY [' + code + '] → status ' + res.status + ' | body: ' + body.slice(0, 300));
+
+        let data = {};
+        try { data = JSON.parse(body); } catch (e) {}
+
         if (data.ok) {
             msg.reply('✅ Tvůj účet na BroFinderu je nyní ověřený! Modrá fajfka už svítí.');
         } else {
-            msg.reply('❌ Neplatný kód. Zkontroluj ho a zkus to znovu. Nový si vygeneruješ v Nastavení.');
+            msg.reply('❌ Neplatný kód. Vygeneruj si nový v Nastavení a zkus to znovu.');
         }
     } catch (e) {
-        console.error(e);
+        console.error('VERIFY error:', e);
         msg.reply('⚠️ Nepodařilo se ověřit kód, zkus to prosím později.');
     }
 });
