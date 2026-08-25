@@ -1,3 +1,8 @@
+// BroFinder ověřovací bot
+// ⚠️ AwardSpace free hosting má často neúplný SSL certifikát, který Node jinak odmítne.
+// Tento řádek říká Node, aby certifikát nekontroloval tak přísně (stačí pro tento účel).
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+
 const { Client, GatewayIntentBits, Partials } = require('discord.js');
 
 const client = new Client({
@@ -30,7 +35,9 @@ client.on('messageCreate', async (msg) => {
     const code = m[1].toUpperCase();
 
     try {
-        const res = await fetch(VERIFY_URL + '?code=' + encodeURIComponent(code));
+        const res = await fetch(VERIFY_URL + '?code=' + encodeURIComponent(code), {
+            headers: { 'User-Agent': 'BroFinderBot/1.0' }
+        });
         const body = await res.text();
         console.log('VERIFY [' + code + '] → status ' + res.status + ' | body: ' + body.slice(0, 300));
 
@@ -43,7 +50,7 @@ client.on('messageCreate', async (msg) => {
             msg.reply('❌ Neplatný kód. Vygeneruj si nový v Nastavení a zkus to znovu.');
         }
     } catch (e) {
-        console.error('VERIFY error:', e);
+        console.error('VERIFY error:', e && e.message ? e.message : e);
         msg.reply('⚠️ Nepodařilo se ověřit kód, zkus to prosím později.');
     }
 });
